@@ -50,11 +50,10 @@ def build_ds(pattern, batch=64, is_train=False, shuffle_buffer=10000, seed=42, a
     files = tf.data.Dataset.list_files(pattern, shuffle=is_train, seed=seed)
     ds = files.map(parse_example, num_parallel_calls=AUTOTUNE)
     
-    # Apply augmentation BEFORE caching for variety
+    ds = ds.cache()  
+
     if augment:
         ds = ds.map(augment_image, num_parallel_calls=AUTOTUNE)
-    
-    ds = ds.cache()
     
     if is_train:
         ds = ds.shuffle(shuffle_buffer, seed=seed, reshuffle_each_iteration=True)

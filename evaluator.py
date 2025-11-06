@@ -244,10 +244,10 @@ def _get_output_dir_for_run(predictions_path: str, run_name: str, results_dir: s
 
 def main():
     ap = argparse.ArgumentParser(description="Evaluate CS559 results folder and summarize metrics.")
-    ap.add_argument("--results_dir", default="results", help="Directory containing *_test_predictions.csv files")
+    ap.add_argument("--results_dir", default="results_homework", help="Directory containing test_predictions.csv files")
     ap.add_argument("--labels", default="", help="Comma-separated label set (e.g., 1,2,3,4,5). If empty, infer from data.")
-    ap.add_argument("--pattern", default="*_test_predictions.csv", help="Glob pattern to find result CSVs")
-    ap.add_argument("--out_csv", default="results/summary_metrics.csv", help="Path to write summary CSV")
+    ap.add_argument("--pattern", default="test_predictions.csv", help="Glob pattern to find result CSVs")
+    ap.add_argument("--out_csv", default="results_homework/summary_metrics.csv", help="Path to write summary CSV")
     args = ap.parse_args()
 
     os.makedirs(os.path.dirname(args.out_csv) or ".", exist_ok=True)
@@ -266,7 +266,18 @@ def main():
 
     rows = []
     for p in paths:
-        run_name = os.path.basename(p).replace("_test_predictions.csv", "")
+        # Extract run_name from parent directory name (matching train_simple_cnn.py structure)
+        # Path format: results_homework/<run_name>/test_predictions.csv
+        parent_dir = os.path.normpath(os.path.dirname(p))
+        results_dir_norm = os.path.normpath(args.results_dir)
+        
+        # If file is in a subdirectory, use the subdirectory name as run_name
+        if parent_dir != results_dir_norm:
+            run_name = os.path.basename(parent_dir)
+        else:
+            # Fallback: if file is directly in results_dir, extract from filename
+            run_name = os.path.basename(p).replace("_test_predictions.csv", "").replace("test_predictions.csv", "")
+        
         # Determine the appropriate output directory for this run
         output_dir = _get_output_dir_for_run(p, run_name, args.results_dir)
         cm_out = os.path.join(output_dir, f"{run_name}_confusion.csv")
@@ -277,7 +288,7 @@ def main():
               f"Acc@1={metrics['acc_within_1']:.4f}, BalAcc={metrics['balanced_accuracy']:.4f}")
 
     summary = pd.DataFrame(rows).set_index("run_name")
-    summary = attach_best_val_metrics(summary, results_dir="results")
+    summary = attach_best_val_metrics(summary, results_dir=args.results_dir)
     base_cols = [
         "num_samples",
         "mae_rounded", "mae_raw", "rmse_raw",
