@@ -16,9 +16,11 @@ This repository contains the tooling used for the CS559 final assignment on faci
    ```bash
    python -m venv venv
    source venv/bin/activate
-   pip install tensorflow pandas numpy
+   pip install --upgrade pip
+   pip install tensorflow pandas numpy pillow
    ```
-   (Install any additional packages you need for experiments.)
+   - On Apple Silicon, `tensorflow-macos` can be installed instead of `tensorflow` if preferred.
+   - Install any extra packages you want for experimentation (e.g., `matplotlib`, `tensorflow-addons`).
 
 2. **Dataset Layout**
    Place the assignment images in the provided folders:
