@@ -1,0 +1,23 @@
+{
+  "num_conv": 4,
+  "filters": [
+    64,
+    128,
+    256,
+    512
+  ],
+  "dense_units": 128,
+  "conv_per_block": 1,
+  "use_strided_conv": true,
+  "batch": 64,
+  "epochs": 150,
+  "lr": 0.001,
+  "loss": "mae",
+  "init": "glorot",
+  "use_bn": true,
+  "l2": 0.0001,
+  "dropout": 0.2,
+  "augment": true,
+  "patience": 15,
+  "results_dir": "results_homework"
+}
