@@ -1,0 +1,25 @@
+{
+  "checkpoint": "results_homework/20251108-112840_conv4_bn_glorot_l2-1e-05_drop-0.2_lr-0.001/best_model.keras",
+  "lr": 0.0001,
+  "epochs": 150,
+  "patience": 20,
+  "num_conv": 4,
+  "filters": [
+    32,
+    64,
+    128,
+    256
+  ],
+  "dense_units": 128,
+  "use_bn": true,
+  "l2": 1e-05,
+  "dropout": 0.2,
+  "augment": false,
+  "batch": 64,
+  "init": "glorot",
+  "loss": "mae",
+  "conv_per_block": 1,
+  "use_strided_conv": false,
+  "results_dir": "results_homework",
+  "original_checkpoint": "results_homework/20251108-112840_conv4_bn_glorot_l2-1e-05_drop-0.2_lr-0.001/best_model.keras"
+}
