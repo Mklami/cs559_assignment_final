@@ -5,6 +5,7 @@ import pandas as pd
 import re, math
 
 _TS_PREFIX = re.compile(r'^\d{8}-\d{6}_')  # e.g., 20251030-131237_
+_TS_ONLY = re.compile(r'^\d{8}-\d{6}$')
 
 def _normalize_name(name: str) -> str:
     # remove timestamp prefix if any
@@ -115,6 +116,98 @@ def attach_best_val_metrics(summary: pd.DataFrame, results_dir: str = "results")
     summary["final_val_raw_mae"] = final_val
     summary["final_val_loss"]    = final_loss
     return summary
+
+
+def _parse_run_name_details(run_name: str) -> dict[str, object]:
+    """Infer hyperparameters encoded in a run_name.
+
+    Supports run names produced by both train_simple_cnn.py and train_simple_cnn_v2.py,
+    and falls back gracefully when tokens are missing/unexpected.
+    """
+    details: dict[str, object] = {}
+
+    if not run_name:
+        return details
+
+    tokens = run_name.split('_')
+    if tokens and _TS_ONLY.match(tokens[0]):
+        details["run_timestamp"] = tokens[0]
+        tokens = tokens[1:]
+
+    # Separate tail hyperparameter tokens (init, l2, drop, lr) from the rest
+    tail_tokens = []
+    remaining_tokens = []
+    for tok in tokens:
+        if tok in {"glorot", "randn", "he", "xavier"} or tok.startswith("l2-") \
+           or tok.startswith("drop-") or tok.startswith("lr-"):
+            tail_tokens.append(tok)
+        else:
+            remaining_tokens.append(tok)
+
+    tokens_arch = remaining_tokens
+
+    # Handle finetune runs (train_simple_cnn_v2 does not use this but keep for completeness)
+    if tokens_arch and tokens_arch[0] == "finetune":
+        details["model_type"] = "finetune"
+        tokens_arch = tokens_arch[1:]
+        if tokens_arch:
+            details["finetune_base"] = tokens_arch[0]
+            tokens_arch = tokens_arch[1:]
+
+    # Parse architecture tokens
+    for tok in tokens_arch:
+        if tok.startswith("conv") and tok[4:].isdigit():
+            details["conv_blocks"] = int(tok[4:])
+            continue
+        if tok.startswith("conv") and "x" in tok:
+            # e.g., "conv4" token already handled; support combined forms like conv4x2
+            m = re.match(r"conv(\d+)[xX](\d+)", tok)
+            if m:
+                details["conv_blocks"] = int(m.group(1))
+                details["conv_per_block"] = int(m.group(2))
+                continue
+        if tok.startswith("x") and tok[1:].isdigit():
+            details["conv_per_block"] = int(tok[1:])
+            continue
+        if tok == "bn":
+            details["use_bn"] = True
+            continue
+        if tok == "nobn":
+            details["use_bn"] = False
+            continue
+        if tok == "strided":
+            details["use_strided_conv"] = True
+            continue
+        if tok == "augment" or tok == "aug":
+            details["use_augment"] = True
+            continue
+        if tok.startswith("f") and len(tok) > 1:
+            # Filter configuration, keep as string
+            details["filters"] = tok[1:]
+            continue
+        # Unrecognized tokens are ignored to keep parser robust
+
+    # Parse tail hyperparameter tokens
+    for tok in tail_tokens:
+        if tok in {"glorot", "randn", "he", "xavier"}:
+            details["init"] = tok
+        elif tok.startswith("l2-"):
+            try:
+                details["l2"] = float(tok.split("-", 1)[1])
+            except ValueError:
+                pass
+        elif tok.startswith("drop-"):
+            try:
+                details["dropout"] = float(tok.split("-", 1)[1])
+            except ValueError:
+                pass
+        elif tok.startswith("lr-"):
+            try:
+                details["lr"] = float(tok.split("-", 1)[1])
+            except ValueError:
+                pass
+
+    return details
 
 
 def ensure_int_labels(arr):
@@ -283,6 +376,9 @@ def main():
         cm_out = os.path.join(output_dir, f"{run_name}_confusion.csv")
         metrics = evaluate_predictions_csv(p, label_set=label_set, save_confusion_to=cm_out)
         metrics["run_name"] = run_name
+
+        # Add parsed hyperparameters/details
+        metrics.update(_parse_run_name_details(run_name))
         rows.append(metrics)
         print(f"[OK] {run_name}: MAE_rounded={metrics['mae_rounded']:.4f}, "
               f"Acc@1={metrics['acc_within_1']:.4f}, BalAcc={metrics['balanced_accuracy']:.4f}")
@@ -296,10 +392,16 @@ def main():
         "balanced_accuracy", "pearson_r", "spearman_r",
         "pred_entropy_bits",
     ]
+    detail_cols = [c for c in [
+        "run_timestamp", "conv_blocks", "conv_per_block",
+        "use_bn", "use_strided_conv", "use_augment",
+        "filters", "init", "l2", "dropout", "lr",
+        "model_type", "finetune_base"
+    ] if c in summary.columns]
     extra_cols = [c for c in ["best_val_raw_mae", "best_val_epoch",
                             "final_val_raw_mae", "final_val_loss"]
                 if c in summary.columns]
-    summary = summary[base_cols + extra_cols]
+    summary = summary[base_cols + detail_cols + extra_cols]
 
 
     summary.to_csv(args.out_csv)
