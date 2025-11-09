@@ -7,6 +7,7 @@ Use this with your best model run:
 - Test MAE: 0.78
 """
 
+import csv
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -16,6 +17,7 @@ import os
 # Step 1: Load your best model
 # (Adjust path to your saved model)
 MODEL_PATH = 'results_homework/20251108-164527_finetune_20251108-112840_conv4_bn_glorot_l2-1e-05_drop-0.2_lr-0.001_lr-0.0001/finetuned_model.keras'
+RUN_DIR = os.path.dirname(MODEL_PATH)
 model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 
 # Step 2: Load test set images and labels
@@ -53,6 +55,16 @@ test_images, test_labels, test_filenames = load_test_data('test')
 # Step 3: Make predictions
 predictions = model.predict(test_images)
 predictions = predictions.flatten()  # Convert to 1D array
+
+# Step 3.5: Save CSV with predictions vs true labels
+csv_path = os.path.join(RUN_DIR, "predictions_vs_true.csv")
+os.makedirs(RUN_DIR, exist_ok=True)
+with open(csv_path, "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["filename", "true", "predicted", "error"])
+    for filename, true_val, pred_val in zip(test_filenames, test_labels, predictions):
+        writer.writerow([filename, f"{true_val:.4f}", f"{pred_val:.4f}", f"{abs(true_val - pred_val):.4f}"])
+print(f"Saved prediction CSV to: {csv_path}")
 
 # Step 4: Calculate absolute errors
 errors = np.abs(test_labels - predictions)
