@@ -1,0 +1,22 @@
+{
+  "num_conv": 5,
+  "filters": [
+    32,
+    64,
+    128,
+    256,
+    512
+  ],
+  "dense_units": 128,
+  "batch": 64,
+  "epochs": 150,
+  "lr": 0.001,
+  "loss": "mae",
+  "init": "glorot",
+  "use_bn": true,
+  "l2": 1e-05,
+  "dropout": 0.2,
+  "augment": true,
+  "patience": 15,
+  "results_dir": "results_homework"
+}
