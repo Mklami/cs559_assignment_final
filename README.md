@@ -1,5 +1,8 @@
 ## CS559 Facial Attractiveness Project
 
+Authors: Mayasah Kareem Lami - 22401352
+Utku Boran Torun - 21901898
+
 This repository contains the tooling used for the CS559 final assignment on facial attractiveness estimation. It includes multiple TensorFlow/Keras training scripts, dataset utilities, evaluation tooling, and analysis helpers to compare experiments and visualize results.
 
 ### Repository Layout (key scripts)
