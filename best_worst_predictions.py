@@ -97,22 +97,6 @@ def save_examples_for_report(indices, images, labels, predictions, errors,
     """Save example images with predictions for the report"""
     os.makedirs(output_dir, exist_ok=True)
     
-    for i, idx in enumerate(indices):
-        fig, ax = plt.subplots(1, 1, figsize=(3, 3))
-        
-        # Display image
-        ax.imshow(images[idx])
-        ax.axis('off')
-        
-        # Add title with prediction info
-        title = f'True: {labels[idx]:.1f}, Pred: {predictions[idx]:.2f}\nError: {errors[idx]:.3f}'
-        ax.set_title(title, fontsize=10)
-        
-        # Save figure
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, f'{prefix}_{i+1}.png'), 
-                   dpi=150, bbox_inches='tight')
-        plt.close()
 
 # Save success examples (best 3)
 save_examples_for_report(best_indices[:4], test_images, test_labels, 
@@ -136,6 +120,27 @@ print(f"  Median Error: {np.median(errors):.4f}")
 print(f"  Std Dev of Error: {np.std(errors):.4f}")
 print(f"  Max Error: {np.max(errors):.4f}")
 print(f"  Min Error: {np.min(errors):.4f}")
+
+
+print("Best Predictions (Success Examples):")
+print("-" * 60)
+for idx in best_indices[:5]:  # Show top 5
+    print(f"File: {test_filenames[idx]}")
+    print(f"  True Label: {test_labels[idx]:.2f}")
+    print(f"  Predicted: {predictions[idx]:.2f}")
+    print(f"  Error: {errors[idx]:.4f}")
+    print()
+
+
+print("\nWorst Predictions (Failure Examples):")
+print("-" * 60)
+for idx in worst_indices[:5]:  # Show top 5
+    print(f"File: {test_filenames[idx]}")
+    print(f"  True Label: {test_labels[idx]:.2f}")
+    print(f"  Predicted: {predictions[idx]:.2f}")
+    print(f"  Error: {errors[idx]:.4f}")
+    print()
+
 
 # Analyze if certain attractiveness levels are harder
 print(f"\nError by True Attractiveness Level:")
