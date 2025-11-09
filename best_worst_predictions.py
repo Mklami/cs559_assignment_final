@@ -15,7 +15,8 @@ import os
 
 # Step 1: Load your best model
 # (Adjust path to your saved model)
-model = tf.keras.models.load_model('results_homework/20251108-164527_finetune_20251108-112840_conv4_bn_glorot_l2-1e-05_drop-0.2_lr-0.001_lr-0.0001/finetuned_model.keras')
+MODEL_PATH = 'results_homework/20251108-164527_finetune_20251108-112840_conv4_bn_glorot_l2-1e-05_drop-0.2_lr-0.001_lr-0.0001/finetuned_model.keras'
+model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 
 # Step 2: Load test set images and labels
 # This assumes you have a way to load your test data
