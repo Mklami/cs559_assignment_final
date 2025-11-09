@@ -103,11 +103,11 @@ def save_examples_for_report(indices, images, labels, predictions, errors,
         plt.close()
 
 # Save success examples (best 3)
-save_examples_for_report(best_indices[:3], test_images, test_labels, 
+save_examples_for_report(best_indices[:4], test_images, test_labels, 
                         predictions, errors, prefix='success')
 
 # Save failure examples (worst 3)
-save_examples_for_report(worst_indices[:3], test_images, test_labels, 
+save_examples_for_report(worst_indices[:4], test_images, test_labels, 
                         predictions, errors, prefix='failure')
 
 print(f"\nExample images saved to 'report_figures/' directory")
