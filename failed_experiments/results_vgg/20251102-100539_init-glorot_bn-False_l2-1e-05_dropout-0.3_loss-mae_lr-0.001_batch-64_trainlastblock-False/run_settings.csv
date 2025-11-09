@@ -1,0 +1,2 @@
+run_name,timestamp,batch,epochs,lr,loss,init,bn,l2,dropout,patience,steps_per_epoch,n_train_images,model_checkpoint,preds_csv_rel
+20251102-100539_init-glorot_bn-False_l2-1e-05_dropout-0.3_loss-mae_lr-0.001_batch-64_trainlastblock-False,20251102-100539,64,60,0.001,mae,glorot,False,1e-05,0.3,6,56,3555,20251102-100539_init-glorot_bn-False_l2-1e-05_dropout-0.3_loss-mae_lr-0.001_batch-64_trainlastblock-False/best_model.keras,20251102-100539_init-glorot_bn-False_l2-1e-05_dropout-0.3_loss-mae_lr-0.001_batch-64_trainlastblock-False_test_predictions.csv
